@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class PassengerCreate(BaseModel):
     name: str
@@ -7,8 +8,11 @@ class PassengerCreate(BaseModel):
 class PassengerOut(BaseModel):
     id: int
     name: str
-    share_amount: float
+    # shareAmount: float = Field(..., alias="share_amount")
+    shareAmount: Optional[float] = 0.0 
     trip_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+        allow_population_by_field_name = True
+

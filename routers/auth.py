@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from fastapi.security import OAuth2PasswordRequestForm
 from models import User
-from schemas.user_schema import UserCreate, UserOut
+from schemas.user_schema import UserCreate, UserOut, UserLogin
 from utils.auth import hash_password, verify_password, create_access_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -26,12 +26,11 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"id": new_user.id, "name": new_user.name, "email": new_user.email}
 
 
-# Login endpoint stays mostly the same
 @router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form_data.username).first()  # use email for login
-    if not user or not verify_password(form_data.password, user.password_hash):
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if not db_user or not verify_password(user.password, db_user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
-    token = create_access_token({"sub": user.email})
+    token = create_access_token({"sub": db_user.email})
     return {"access_token": token, "token_type": "bearer"}

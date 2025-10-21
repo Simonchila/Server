@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -10,14 +10,18 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     trips = relationship("Trip", back_populates="user")
 
+
 class Trip(Base):
     __tablename__ = "trips"
     id = Column(Integer, primary_key=True, index=True)
+    start = Column(String(100), nullable=False)  # ✅ added
     destination = Column(String(100), nullable=False)
+    date = Column(String(50), nullable=False)    # ✅ added
     total_cost = Column(Float, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="trips")
     passengers = relationship("Passenger", back_populates="trip")
+
 
 class Passenger(Base):
     __tablename__ = "passengers"
