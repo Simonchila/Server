@@ -173,3 +173,24 @@ def delete_trip(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error deleting trip: {e}")
+
+
+@router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_trip(trip_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    # Fetch the trip
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    
+    # Check ownership
+    if trip.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this trip")
+    
+    # Delete associated passengers first
+    db.query(Passenger).filter(Passenger.trip_id == trip_id).delete(synchronize_session=False)
+    
+    # Delete the trip
+    db.delete(trip)
+    db.commit()
+    
+    return

@@ -28,5 +28,7 @@ class Passenger(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     share_amount = Column(Float, default=0.0)
+    surcharge = Column(Float, default=0.0)
     trip_id = Column(Integer, ForeignKey("trips.id"))
     trip = relationship("Trip", back_populates="passengers")
+
